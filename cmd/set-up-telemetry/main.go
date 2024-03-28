@@ -29,6 +29,14 @@ func generateTraceID(runID int64, runAttempt int) string {
 	return traceID
 }
 
+func generateJobSpanID(runID int64, runAttempt int, job string) (string, error) {
+	input := fmt.Sprintf("%d%d%s", runID, runAttempt, job)
+	hash := sha256.Sum256([]byte(input))
+	spanIDHex := hex.EncodeToString(hash[:])
+	spanID := spanIDHex[16:32]
+	return spanID, nil
+}
+
 func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, attempt int64) (jobID, jobName string, err error) {
 	splitRepo := strings.Split(repo, "/")
 	if len(splitRepo) != 2 {
@@ -70,7 +78,7 @@ func main() {
 
 	traceID := generateTraceID(runID, runAttempt)
 	githubactions.SetOutput("trace-id", traceID)
-	githubactions.Infof("Trace ID: %s", traceID)
+	githubactions.Infof("trace-id: %s", traceID)
 
 	jobID, jobName, err := getGitHubJobInfo(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
 	if err != nil {
@@ -78,7 +86,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	jobSpanID, err := generateJobSpanID(runID, int(runAttempt), jobName)
+	if err != nil {
+		githubactions.Errorf("Error generating job span ID: %v", err)
+		os.Exit(1)
+	}
+
 	githubactions.SetOutput("job-id", jobID)
+	githubactions.Infof("job-id: %s", jobID)
 	githubactions.SetOutput("job-name", jobName)
-	githubactions.Infof("Job ID: %s, Job name: %s", jobID, jobName)
+	githubactions.Infof("job-name: %s", jobName)
+	githubactions.SetOutput("job-span-id", jobSpanID)
+	githubactions.Infof("job-span-id: %s", jobSpanID)
+
+	traceparent := fmt.Sprintf("00-%s-%s-01", traceID, jobSpanID)
+	githubactions.SetOutput("traceparent", traceparent)
+	githubactions.Infof("traceparent: %s", traceparent)
 }
