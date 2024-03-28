@@ -23,7 +23,7 @@ func generateTraceID(runID int64, runAttempt int) string {
 	return fmt.Sprintf("%d%d", runID, runAttempt)
 }
 
-func getGitHubJobName(token, owner, repo string, runID int64) (string, error) {
+func getGitHubJobName(ctx context.Context, token, owner, repo string, runID, attempt int64) (string, error) {
 	splitRepo := strings.Split(repo, "/")
 	if len(splitRepo) != 2 {
 		return "", fmt.Errorf("GITHUB_REPOSITORY environment variable is malformed: %s", repo)
@@ -31,13 +31,18 @@ func getGitHubJobName(token, owner, repo string, runID int64) (string, error) {
 	owner, repo = splitRepo[0], splitRepo[1]
 
 	client := github.NewClient(nil).WithAuthToken(token)
-	runJobs, _, err := client.Actions.ListWorkflowJobs(context.Background(), owner, repo, runID, nil)
+
+	opts := &github.ListWorkflowJobsOptions{
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	runJobs, _, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
 	if err != nil {
 		return "", err
 	}
 
+	runnerName := os.Getenv("RUNNER_NAME")
 	for _, job := range runJobs.Jobs {
-		if *job.RunID == runID {
+		if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
 			return *job.Name, nil
 		}
 	}
@@ -46,6 +51,7 @@ func getGitHubJobName(token, owner, repo string, runID int64) (string, error) {
 }
 
 func main() {
+	ctx := context.Background()
 	githubactions.Infof("Starting %s version: %s (%s) commit: %s", actionName, BUILD_VERSION, BUILD_DATE, COMMIT_ID)
 
 	if githubactions.GetInput("github-token") == "" {
@@ -58,12 +64,14 @@ func main() {
 
 	traceID := generateTraceID(runID, runAttempt)
 	githubactions.SetOutput("trace-id", traceID)
+	githubactions.Infof("Trace ID: %s", traceID)
 
-	jobName, err := getGitHubJobName(githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID)
+	jobName, err := getGitHubJobName(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
 	if err != nil {
 		fmt.Printf("Error getting job name: %v\n", err)
 		os.Exit(1)
 	}
 
 	githubactions.SetOutput("job-name", jobName)
+	githubactions.Infof("Job name: %s", jobName)
 }
