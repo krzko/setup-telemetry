@@ -1,0 +1,34 @@
+name: Set Up Telemetry
+
+description: >
+  This action exports trace IDs and job names for use in other steps or jobs
+  within the GitHub Actions workflow.
+
+author: Kristof Kowalski
+
+inputs:
+  github-token:
+    required: true
+    default: ${{ github.token }}
+    description: A token that can be used with the GitHub API.
+  job-name:
+    required: false
+    description: >
+      The name of the GitHub Actions job.
+
+outputs:
+  trace-id:
+    description: >
+      The Trace ID generated for the job.
+  job-name:
+    description: >
+      The name of the GitHub Actions job.
+
+runs:
+  using: node20
+  main: index.js
+
+branding:
+  icon: person-running
+  color: gray-dark
+
