@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strconv"
@@ -20,7 +22,11 @@ var (
 )
 
 func generateTraceID(runID int64, runAttempt int) string {
-	return fmt.Sprintf("%d%d", runID, runAttempt)
+	input := fmt.Sprintf("%d%dt", runID, runAttempt)
+	hash := sha256.Sum256([]byte(input))
+	traceIDHex := hex.EncodeToString(hash[:])
+	traceID := traceIDHex[:32]
+	return traceID
 }
 
 func getGitHubJobName(ctx context.Context, token, owner, repo string, runID, attempt int64) (string, error) {
