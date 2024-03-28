@@ -48,7 +48,11 @@ func getGitHubJobName(token, owner, repo string, runID int64) (string, error) {
 func main() {
 	githubactions.Infof("Starting %s version: %s (%s) commit: %s", actionName, BUILD_VERSION, BUILD_DATE, COMMIT_ID)
 
-	githubToken := os.Getenv("GITHUB_TOKEN")
+	if githubactions.GetInput("github-token") == "" {
+		githubactions.Fatalf("No GitHub token provided")
+	}
+
+	githubToken := githubactions.GetInput("github-token")
 	runID, _ := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
 	runAttempt, _ := strconv.Atoi(os.Getenv("GITHUB_RUN_ATTEMPT"))
 
