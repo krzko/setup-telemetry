@@ -29,10 +29,10 @@ func generateTraceID(runID int64, runAttempt int) string {
 	return traceID
 }
 
-func getGitHubJobName(ctx context.Context, token, owner, repo string, runID, attempt int64) (string, error) {
+func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, attempt int64) (jobID, jobName string, err error) {
 	splitRepo := strings.Split(repo, "/")
 	if len(splitRepo) != 2 {
-		return "", fmt.Errorf("GITHUB_REPOSITORY environment variable is malformed: %s", repo)
+		return "", "", fmt.Errorf("GITHUB_REPOSITORY environment variable is malformed: %s", repo)
 	}
 	owner, repo = splitRepo[0], splitRepo[1]
 
@@ -43,17 +43,17 @@ func getGitHubJobName(ctx context.Context, token, owner, repo string, runID, att
 	}
 	runJobs, _, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	runnerName := os.Getenv("RUNNER_NAME")
 	for _, job := range runJobs.Jobs {
 		if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
-			return *job.Name, nil
+			return strconv.FormatInt(*job.ID, 10), *job.Name, nil
 		}
 	}
 
-	return "", fmt.Errorf("no job found matching the criteria")
+	return "", "", fmt.Errorf("no job found matching the criteria")
 }
 
 func main() {
@@ -72,12 +72,13 @@ func main() {
 	githubactions.SetOutput("trace-id", traceID)
 	githubactions.Infof("Trace ID: %s", traceID)
 
-	jobName, err := getGitHubJobName(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
+	jobID, jobName, err := getGitHubJobInfo(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
 	if err != nil {
-		fmt.Printf("Error getting job name: %v\n", err)
+		githubactions.Errorf("Error getting job info: %v", err)
 		os.Exit(1)
 	}
 
+	githubactions.SetOutput("job-id", jobID)
 	githubactions.SetOutput("job-name", jobName)
-	githubactions.Infof("Job name: %s", jobName)
+	githubactions.Infof("Job ID: %s, Job name: %s", jobID, jobName)
 }
