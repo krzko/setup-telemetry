@@ -8,6 +8,8 @@ The `job-name` output uses the default `name` or the name provided by `run-name`
 
 This action provides a consistent and accessible method to retrieve these values for further use in your workflow, which is especially useful in complex workflows where these values need to be explicitly managed or passed between jobs.
 
+Trace IDs and job span IDs are generated in a deterministic fashion from the associated run ID and run attempt, with job span IDs also incorporating the job name. This deterministic generation ensures consistent and predictable identifiers for tracing and telemetry across workflow executions.
+
 ## Usage
 
 ### Pre-requisites
