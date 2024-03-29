@@ -42,24 +42,24 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up telemetry
-      id: setup-telemetry
-      uses: krzko/setup-telemetry@v1
+      id: set-up-telemetry
+      uses: krzko/set-up-telemetry@v0.1.0
 
     - name: Use Trace ID
-      run: echo "Trace ID: ${{ steps.setup-telemetry.outputs.trace-id }}"
+      run: echo "Trace ID: ${{ steps.set-up-telemetry.outputs.trace-id }}"
 
     - name: Use Job Span ID
-      run: echo "Job Span ID: ${{ steps.setup-telemetry.outputs.job-span-id }}"
+      run: echo "Job Span ID: ${{ steps.set-up-telemetry.outputs.job-span-id }}"
 
     - name: Use Traceparent
-      run: echo "Traceparent: ${{ steps.setup-telemetry.outputs.traceparent }}"
+      run: echo "Traceparent: ${{ steps.set-up-telemetry.outputs.traceparent }}"
 ```
 
 In this workflow, the `Set up telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
 
 ### Contributing
 
-Contributions to actions/setup-telemetry are welcome! Please refer to the repository's CONTRIBUTING.md for guidelines on how to submit contributions.
+Contributions to `krzko/set-up-telemetry` are welcome! Please refer to the repository's CONTRIBUTING.md for guidelines on how to submit contributions.
 
 ## License
 
