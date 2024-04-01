@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v60/github"
 	"github.com/sethvargo/go-githubactions"
@@ -37,10 +38,10 @@ func generateJobSpanID(runID int64, runAttempt int, job string) (string, error) 
 	return spanID, nil
 }
 
-func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, attempt int64) (jobID, jobName string, err error) {
+func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, attempt int64) (jobID, jobName, createdAt, startedAt string, err error) {
 	splitRepo := strings.Split(repo, "/")
 	if len(splitRepo) != 2 {
-		return "", "", fmt.Errorf("GITHUB_REPOSITORY environment variable is malformed: %s", repo)
+		return "", "", "", "", fmt.Errorf("GITHUB_REPOSITORY environment variable is malformed: %s", repo)
 	}
 	owner, repo = splitRepo[0], splitRepo[1]
 
@@ -51,17 +52,19 @@ func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, att
 	}
 	runJobs, _, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	runnerName := os.Getenv("RUNNER_NAME")
 	for _, job := range runJobs.Jobs {
 		if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
-			return strconv.FormatInt(*job.ID, 10), *job.Name, nil
+			createdAt = job.CreatedAt.Format(time.RFC3339)
+			startedAt = job.StartedAt.Format(time.RFC3339)
+			return strconv.FormatInt(*job.ID, 10), *job.Name, createdAt, startedAt, nil
 		}
 	}
 
-	return "", "", fmt.Errorf("no job found matching the criteria")
+	return "", "", "", "", fmt.Errorf("no job found matching the criteria")
 }
 
 func main() {
@@ -80,15 +83,9 @@ func main() {
 	githubactions.SetOutput("trace-id", traceID)
 	githubactions.Infof("trace-id: %s", traceID)
 
-	jobID, jobName, err := getGitHubJobInfo(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
+	jobID, jobName, createdAt, startedAt, err := getGitHubJobInfo(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
 	if err != nil {
 		githubactions.Errorf("Error getting job info: %v", err)
-		os.Exit(1)
-	}
-
-	jobSpanID, err := generateJobSpanID(runID, int(runAttempt), jobName)
-	if err != nil {
-		githubactions.Errorf("Error generating job span ID: %v", err)
 		os.Exit(1)
 	}
 
@@ -96,6 +93,17 @@ func main() {
 	githubactions.Infof("job-id: %s", jobID)
 	githubactions.SetOutput("job-name", jobName)
 	githubactions.Infof("job-name: %s", jobName)
+	githubactions.SetOutput("created-at", createdAt)
+	githubactions.Infof("created-at: %s", createdAt)
+	githubactions.SetOutput("started-at", startedAt)
+	githubactions.Infof("started-at: %s", startedAt)
+
+	jobSpanID, err := generateJobSpanID(runID, int(runAttempt), jobName)
+	if err != nil {
+		githubactions.Errorf("Error generating job span ID: %v", err)
+		os.Exit(1)
+	}
+
 	githubactions.SetOutput("job-span-id", jobSpanID)
 	githubactions.Infof("job-span-id: %s", jobSpanID)
 

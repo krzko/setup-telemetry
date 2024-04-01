@@ -1,7 +1,7 @@
 name: Set Up Telemetry
 
 description: >
-  This action exports trace IDs and job names for use in other steps or jobs
+  This action exports trace IDs, job names, creation, and start times for use in other steps or jobs
   within the GitHub Actions workflow.
 
 author: Kristof Kowalski
@@ -13,16 +13,23 @@ inputs:
     description: A token that can be used with the GitHub API.
   job-name:
     required: false
-    description: >
-      The name of the GitHub Actions job.
+    description: The name of the GitHub Actions job.
 
 outputs:
   trace-id:
-    description: >
-      The Trace ID generated for the job.
+    description: The Trace ID generated for the job.
   job-name:
-    description: >
-      The name of the GitHub Actions job.
+    description: The name of the GitHub Actions job.
+  job-id:
+    description: The ID of the GitHub Actions job.
+  job-span-id:
+    description: The Span ID generated for the job.
+  traceparent:
+    description: The W3C Trace Context traceparent value for the job.
+  created-at:
+    description: The creation time of the GitHub Actions job in RFC 3339 format.
+  started-at:
+    description: The start time of the GitHub Actions job in RFC 3339 format.
 
 runs:
   using: node20
@@ -31,4 +38,3 @@ runs:
 branding:
   icon: person-running
   color: gray-dark
-
