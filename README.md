@@ -26,16 +26,18 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 
 ### Outputs
 
-- `trace-id`: The generated trace ID for the workflow run.
+- `created-ad`" The timestamp when the workflow run was created.
 - `job-id`: The ID of the GitHub Actions job.
 - `job-name`: The name of the GitHub Actions job.
 - `job-span-id`: The generated span ID for the job.
+- `started-at`: The timestamp when the workflow run started.
 - `traceparent`: The W3C Trace Context traceparent value for the workflow run.
+- `trace-id`: The generated trace ID for the workflow run.
 
 ### Example Usage
 
 ```yaml
-name: Build
+name: Test and Build
 
 on:
   push:
@@ -46,6 +48,31 @@ env:
   otel-resource-attributes: deployment.environent=dev,service.version=0.1.0
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup telemetry
+        id: setup-telemetry
+        uses: krzko/setup-telemetry@v0.3.0
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: # do_some_work
+
+      - name: Export job telemetry
+        if: always()
+        uses: krzko/export-job-telemetry@v0.3.0
+        with:
+          created-at: ${{ steps.setup-telemetry.outputs.created-at }}
+          job-status: ${{ job.status }}
+          job-name: ${{ steps.setup-telemetry.outputs.job-name }}
+          otel-exporter-otlp-endpoint: ${{ env.otel-exporter-otlp-endpoint }}
+          otel-resource-attributes: "foo.new_attribute=123,${{ env.otel-resource-attributes }}"
+          otel-service-name: ${{ env.otel-service-name }}
+          started-at: ${{ steps.setup-telemetry.outputs.started-at }}
+          traceparent: ${{ steps.setup-telemetry.outputs.traceparent }}
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +89,9 @@ jobs:
         if: always()
         uses: krzko/export-job-telemetry@v0.3.0
         with:
+          created-at: ${{ steps.setup-telemetry.outputs.created-at }}
           job-status: ${{ job.status }}
+          job-name: ${{ steps.setup-telemetry.outputs.job-name }}
           otel-exporter-otlp-endpoint: ${{ env.otel-exporter-otlp-endpoint }}
           otel-resource-attributes: "foo.new_attribute=123,${{ env.otel-resource-attributes }}"
           otel-service-name: ${{ env.otel-service-name }}
@@ -70,7 +99,7 @@ jobs:
           traceparent: ${{ steps.setup-telemetry.outputs.traceparent }}
 ```
 
-In this workflow, the `Setup telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
+In this workflow, the `Setup telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow, such as using the [krzko/export-job-telemetry](https://github.com/krzko/export-job-telemetry) action.
 
 ### Contributing
 
