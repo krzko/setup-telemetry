@@ -1,4 +1,4 @@
-name: Set Up Telemetry
+name: Setup telemetry
 
 description: >
   This action exports trace IDs, job names, creation, and start times for use in other steps or jobs

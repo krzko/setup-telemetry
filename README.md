@@ -49,7 +49,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up telemetry
+      - name: Setup telemetry
         id: setup-telemetry
         uses: krzko/setup-telemetry@v0.3.0
 
@@ -70,7 +70,7 @@ jobs:
           traceparent: ${{ steps.setup-telemetry.outputs.traceparent }}
 ```
 
-In this workflow, the `Set up telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
+In this workflow, the `Setup telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
 
 ### Contributing
 
