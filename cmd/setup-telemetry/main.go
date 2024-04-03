@@ -110,4 +110,10 @@ func main() {
 	traceparent := fmt.Sprintf("00-%s-%s-01", traceID, jobSpanID)
 	githubactions.SetOutput("traceparent", traceparent)
 	githubactions.Infof("traceparent: %s", traceparent)
+
+	markdownSummary := fmt.Sprintf("### 🚦 %s\n", actionName)
+	markdownSummary += fmt.Sprintf("traceparent: `%s`\n", traceparent)
+	markdownSummary += fmt.Sprintf("trace-id: `%s`\n", traceID)
+
+	githubactions.AddStepSummary(markdownSummary)
 }
