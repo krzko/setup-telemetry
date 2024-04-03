@@ -1,4 +1,4 @@
-module github.com/krzko/set-up-telemetry
+module github.com/krzko/setup-telemetry
 
 go 1.21.6
 

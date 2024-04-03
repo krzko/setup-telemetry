@@ -14,7 +14,7 @@ import (
 	"github.com/sethvargo/go-githubactions"
 )
 
-const actionName = "set-up-telemetry"
+const actionName = "setup-telemetry"
 
 var (
 	BUILD_VERSION string

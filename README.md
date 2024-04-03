@@ -50,8 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up telemetry
-        id: set-up-telemetry
-        uses: krzko/set-up-telemetry@v0.2.1
+        id: setup-telemetry
+        uses: krzko/setup-telemetry@v0.3.0
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,21 +60,21 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.2.1
+        uses: krzko/export-job-telemetry@v0.3.0
         with:
           job-status: ${{ job.status }}
           otel-exporter-otlp-endpoint: ${{ env.otel-exporter-otlp-endpoint }}
           otel-resource-attributes: "foo.new_attribute=123,${{ env.otel-resource-attributes }}"
           otel-service-name: ${{ env.otel-service-name }}
-          started-at: ${{ steps.set-up-telemetry.outputs.started-at }}
-          traceparent: ${{ steps.set-up-telemetry.outputs.traceparent }}
+          started-at: ${{ steps.setup-telemetry.outputs.started-at }}
+          traceparent: ${{ steps.setup-telemetry.outputs.traceparent }}
 ```
 
 In this workflow, the `Set up telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
 
 ### Contributing
 
-Contributions to `krzko/set-up-telemetry` are welcome! Please refer to the repository's CONTRIBUTING.md for guidelines on how to submit contributions.
+Contributions to `krzko/setup-telemetry` are welcome! Please refer to the repository's CONTRIBUTING.md for guidelines on how to submit contributions.
 
 ## License
 

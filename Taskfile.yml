@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   BUILD_VERSION:
-    sh: echo "v0.2.1"
+    sh: echo "v0.3.0"
   BUILD_DATE:
     sh: date "+%F %T"
   COMMIT_ID:
@@ -18,9 +18,9 @@ tasks:
     cmds:
       - |
         GOOS={{.GOOS}} GOARCH={{.GOARCH}} GOARM={{.GOARM}} GOMIPS={{.GOMIPS}} GOAMD64={{.GOAMD64}} \
-        go build -o bin/set-up-telemetry-{{.TASK}} -ldflags \
-        "-w -s -X 'main.BUILD_VERSION={{.BUILD_VERSION}}' -X 'main.BUILD_DATE={{.BUILD_DATE}}' -X 'main.COMMIT_ID={{.COMMIT_ID}}'" cmd/set-up-telemetry/main.go
-        upx --best --lzma bin/set-up-telemetry-{{.TASK}}
+        go build -o bin/setup-telemetry-{{.TASK}} -ldflags \
+        "-w -s -X 'main.BUILD_VERSION={{.BUILD_VERSION}}' -X 'main.BUILD_DATE={{.BUILD_DATE}}' -X 'main.COMMIT_ID={{.COMMIT_ID}}'" cmd/setup-telemetry/main.go
+        upx --best --lzma bin/setup-telemetry-{{.TASK}}
   linux-386:
     cmds:
       - task: build-tpl

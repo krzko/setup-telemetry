@@ -7,22 +7,22 @@ function chooseBinary() {
     const arch = os.arch()
 
     if (platform === 'darwin' && arch === 'x64') {
-        return `bin/set-up-telemetry-darwin-amd64`
+        return `bin/setup-telemetry-darwin-amd64`
     }
     if (platform === 'darwin' && arch === 'arm64') {
-        return `bin/set-up-telemetry-darwin-arm64`
+        return `bin/setup-telemetry-darwin-arm64`
     }
     if (platform === 'linux' && arch === 'x64') {
-        return `bin/set-up-telemetry-linux-amd64`
+        return `bin/setup-telemetry-linux-amd64`
     }
     if (platform === 'linux' && arch === 'arm64') {
-        return `bin/set-up-telemetry-linux-armv8`
+        return `bin/setup-telemetry-linux-armv8`
     }
     if (platform === 'win32' && arch === 'x64') {
-        return `bin/set-up-telemetry-windows-amd64.exe`
+        return `bin/setup-telemetry-windows-amd64.exe`
     }
     if (platform === 'win32' && arch === 'arm64') {
-        return `bin/set-up-telemetry-windows-arm64.exe`
+        return `bin/setup-telemetry-windows-arm64.exe`
     }
 
     console.error(`Unsupported platform (${platform}) and architecture (${arch})`)
