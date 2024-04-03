@@ -2,8 +2,7 @@ version: '3'
 
 vars:
   BUILD_VERSION:
-    # sh: git describe --tags
-    sh: echo "v0.1.0"
+    sh: echo "v0.2.1"
   BUILD_DATE:
     sh: date "+%F %T"
   COMMIT_ID:

@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Set up telemetry
         id: set-up-telemetry
-        uses: krzko/set-up-telemetry@v0.2.0
+        uses: krzko/set-up-telemetry@v0.2.1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.2.0
+        uses: krzko/export-job-telemetry@v0.2.1
         with:
           job-status: ${{ job.status }}
           otel-exporter-otlp-endpoint: ${{ env.otel-exporter-otlp-endpoint }}
