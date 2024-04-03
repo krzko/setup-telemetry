@@ -62,7 +62,7 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.4.1
+        uses: krzko/export-job-telemetry@v0.3.0
         with:
           created-at: ${{ steps.setup-telemetry.outputs.created-at }}
           job-status: ${{ job.status }}
@@ -87,7 +87,7 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.4.1
+        uses: krzko/export-job-telemetry@v0.3.0
         with:
           created-at: ${{ steps.setup-telemetry.outputs.created-at }}
           job-status: ${{ job.status }}
