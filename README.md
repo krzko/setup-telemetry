@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.3.0
+        uses: krzko/setup-telemetry@v0.4.1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.3.0
+        uses: krzko/export-job-telemetry@v0.4.1
         with:
           created-at: ${{ steps.setup-telemetry.outputs.created-at }}
           job-status: ${{ job.status }}
@@ -78,7 +78,7 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.3.0
+        uses: krzko/setup-telemetry@v0.4.1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,7 +87,7 @@ jobs:
 
       - name: Export job telemetry
         if: always()
-        uses: krzko/export-job-telemetry@v0.3.0
+        uses: krzko/export-job-telemetry@v0.4.1
         with:
           created-at: ${{ steps.setup-telemetry.outputs.created-at }}
           job-status: ${{ job.status }}
