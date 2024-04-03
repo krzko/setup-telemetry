@@ -1,6 +1,6 @@
 # Set Up Telemetry Action
 
-This action exports trace and job IDs, and sets up a traceparent for use in GitHub Actions workflows to enable telemetry and tracing.
+This action exports trace and job IDs, and sets up a traceparent for use in GitHub Actions workflows to enable telemetry and tracing. It is intended to be used in conjunction with the [OpenTelemetry Collector GitHub Actions Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/27460). This receiver processes GitHub Actions webhook events to observe workflows and jobs, converting them into trace telemetry for detailed observability.
 
 It is important to note that `job-id` and `job-name` are not directly accessible through the [GitHub environment variables](https://docs.github.com/en/actions/learn-github-actions/variables).
 
@@ -9,6 +9,10 @@ The `job-name` output uses the default `name` or the name provided by `run-name`
 This action provides a consistent and accessible method to retrieve these values for further use in your workflow, which is especially useful in complex workflows where these values need to be explicitly managed or passed between jobs.
 
 Trace IDs and job span IDs are generated in a deterministic fashion from the associated run ID and run attempt, with job span IDs also incorporating the job name. This deterministic generation ensures consistent and predictable identifiers for tracing and telemetry across workflow executions.
+
+## GitHub Actions Receiver
+
+The GitHub Actions Receiver processes GitHub Actions webhook events to observe workflows and jobs. It handles `workflow_job` and `workflow_run` event payloads, transforming them into trace telemetry. This allows the observation of workflow execution times, success, and failure rates. If a secret is configured (recommended), it validates the payload ensuring data integrity before processing.
 
 ## Usage
 
@@ -31,30 +35,39 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 ### Example Usage
 
 ```yaml
-name: Example Telemetry Workflow
+name: Build
 
-on: [push]
+on:
+  push:
+
+env:
+  otel-exporter-otlp-endpoint: otelcol.foo.corp:443
+  otel-service-name: o11y.workflows
+  otel-resource-attributes: deployment.environent=dev,service.version=0.1.0
 
 jobs:
-  telemetry:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Set up telemetry
+        id: set-up-telemetry
+        uses: krzko/set-up-telemetry@v0.2.0
 
-    - name: Set up telemetry
-      id: set-up-telemetry
-      uses: krzko/set-up-telemetry@v0.1.0
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Use Trace ID
-      run: echo "Trace ID: ${{ steps.set-up-telemetry.outputs.trace-id }}"
+      - run: # do_some_work
 
-    - name: Use Job Span ID
-      run: echo "Job Span ID: ${{ steps.set-up-telemetry.outputs.job-span-id }}"
-
-    - name: Use Traceparent
-      run: echo "Traceparent: ${{ steps.set-up-telemetry.outputs.traceparent }}"
+      - name: Export job telemetry
+        if: always()
+        uses: krzko/export-job-telemetry@v0.2.0
+        with:
+          job-status: ${{ job.status }}
+          otel-exporter-otlp-endpoint: ${{ env.otel-exporter-otlp-endpoint }}
+          otel-resource-attributes: "foo.new_attribute=123,${{ env.otel-resource-attributes }}"
+          otel-service-name: ${{ env.otel-service-name }}
+          started-at: ${{ steps.set-up-telemetry.outputs.started-at }}
+          traceparent: ${{ steps.set-up-telemetry.outputs.traceparent }}
 ```
 
 In this workflow, the `Set up telemetry` action is used to generate and output the trace ID, job ID, job name, job span ID, and traceparent, which can then be used in subsequent steps of the workflow.
