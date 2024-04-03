@@ -1,4 +1,4 @@
-# Set Up Telemetry Action
+# Setup Telemetry Action
 
 This action exports trace and job IDs, and sets up a traceparent for use in GitHub Actions workflows to enable telemetry and tracing. It is intended to be used in conjunction with the [OpenTelemetry Collector GitHub Actions Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/27460). This receiver processes GitHub Actions webhook events to observe workflows and jobs, converting them into trace telemetry for detailed observability.
 
