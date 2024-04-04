@@ -24,14 +24,14 @@ outputs:
     description: The name of the GitHub Actions job.
   job-span-id:
     description: The Span ID generated for the job.
-  observability-backend-url:
-    description: The URL to the observability backend, to create a trace link.
   started-at:
     description: The start time of the GitHub Actions job in RFC 3339 format.
   traceparent:
     description: The W3C Trace Context traceparent value for the job.
   trace-id:
     description: The Trace ID generated for the job.
+  trace-link:
+    description: The URL to the observability backend, to create a trace link.
 
 runs:
   using: node20

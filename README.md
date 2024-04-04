@@ -32,9 +32,9 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 - `job-name`: The name of the GitHub Actions job.
 - `job-span-id`: The generated span ID for the job.
 - `started-at`: The timestamp when the workflow run started.
-- `observability-backend-url`: The URL of the observability backend with appended `trace-id`.
-- `trace-id`: The generated trace ID for the workflow run.
 - `traceparent`: The W3C Trace Context traceparent value for the workflow run.
+- `trace-id`: The generated trace ID for the workflow run.
+- `trace-link`: The URL of the observability backend with appended `trace-id`.
 
 ### Example Usage
 
