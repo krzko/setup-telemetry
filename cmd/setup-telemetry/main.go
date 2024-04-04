@@ -118,7 +118,7 @@ func main() {
 	observabilityBackendURL := githubactions.GetInput("observability-backend-url")
 	if observabilityBackendURL != "" {
 		traceLink := fmt.Sprintf("%s%s", observabilityBackendURL, traceID)
-		markdownSummary += fmt.Sprintf("\n🔗 [View trace](%s)\n", traceLink)
+		markdownSummary += fmt.Sprintf("\n🔗 [View trace](%s){:target=\"_blank\"}\n", traceLink)
 	}
 
 	githubactions.AddStepSummary(markdownSummary)
