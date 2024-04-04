@@ -22,19 +22,23 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 
 ### Inputs
 
-- `github-token`: A token that can be used with the GitHub API. Default is `${{ github.token }}`.
-- `observability-backend-url`: Base URL to the observability backend, to create a trace link.
+| Name                      | Description                                                         | Required |
+|----------------------------|---------------------------------------------------------------------|----------|
+| `github-token`             | A token that can be used with the GitHub API. Default is `${{ github.token }}`. | Optional |
+| `observability-backend-url`| Base URL to the observability backend, to create a trace link.     | Optional |
 
 ### Outputs
 
-- `created-ad`" The timestamp when the workflow run was created.
-- `job-id`: The ID of the GitHub Actions job.
-- `job-name`: The name of the GitHub Actions job.
-- `job-span-id`: The generated span ID for the job.
-- `started-at`: The timestamp when the workflow run started.
-- `traceparent`: The W3C Trace Context traceparent value for the workflow run.
-- `trace-id`: The generated trace ID for the workflow run.
-- `trace-link`: The URL of the observability backend with appended `trace-id`.
+| Output          | Description                                                       |
+|-----------------|-------------------------------------------------------------------|
+| `created-at`    | The timestamp when the workflow run was created.                  |
+| `job-id`        | The ID of the GitHub Actions job.                                |
+| `job-name`      | The name of the GitHub Actions job.                              |
+| `job-span-id`   | The generated span ID for the job.                               |
+| `started-at`    | The timestamp when the workflow run started.                     |
+| `traceparent`   | The W3C Trace Context traceparent value for the workflow run.    |
+| `trace-id`      | The generated trace ID for the workflow run.                     |
+| `trace-link`    | The URL of the observability backend with appended `trace-id`.   |
 
 ### Example Usage
 
@@ -45,6 +49,7 @@ on:
   push:
 
 env:
+  observability-backend-url: https://ui.honeycomb.io/foo/environments/dev/datasets/github.com.foo/trace?trace_id=
   otel-exporter-otlp-endpoint: otelcol.foo.corp:443
   otel-service-name: o11y.workflows
   otel-resource-attributes: deployment.environent=dev,service.version=0.1.0
@@ -55,7 +60,9 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.4.1
+        uses: krzko/setup-telemetry@v0.5.1
+        with:
+          observability-backend-url: ${{ env.observability-backend-url }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,7 +87,9 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.4.1
+        uses: krzko/setup-telemetry@v0.5.1
+        with:
+          observability-backend-url: ${{ env.observability-backend-url }}
 
       - name: Checkout
         uses: actions/checkout@v4
