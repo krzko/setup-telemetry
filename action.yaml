@@ -11,25 +11,27 @@ inputs:
     required: true
     default: ${{ github.token }}
     description: A token that can be used with the GitHub API.
-  job-name:
+  observability-backend-url:
     required: false
-    description: The name of the GitHub Actions job.
+    description: Base URL to the observability backend, to create a trace link.
 
 outputs:
-  trace-id:
-    description: The Trace ID generated for the job.
-  job-name:
-    description: The name of the GitHub Actions job.
-  job-id:
-    description: The ID of the GitHub Actions job.
-  job-span-id:
-    description: The Span ID generated for the job.
-  traceparent:
-    description: The W3C Trace Context traceparent value for the job.
   created-at:
     description: The creation time of the GitHub Actions job in RFC 3339 format.
+  job-id:
+    description: The ID of the GitHub Actions job.
+  job-name:
+    description: The name of the GitHub Actions job.
+  job-span-id:
+    description: The Span ID generated for the job.
+  observability-backend-url:
+    description: The URL to the observability backend, to create a trace link.
   started-at:
     description: The start time of the GitHub Actions job in RFC 3339 format.
+  traceparent:
+    description: The W3C Trace Context traceparent value for the job.
+  trace-id:
+    description: The Trace ID generated for the job.
 
 runs:
   using: node20

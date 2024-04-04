@@ -23,6 +23,7 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 ### Inputs
 
 - `github-token`: A token that can be used with the GitHub API. Default is `${{ github.token }}`.
+- `observability-backend-url`: Base URL to the observability backend, to create a trace link.
 
 ### Outputs
 
@@ -31,6 +32,7 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 - `job-name`: The name of the GitHub Actions job.
 - `job-span-id`: The generated span ID for the job.
 - `started-at`: The timestamp when the workflow run started.
+- `observability-backend-url`: The URL of the observability backend with appended `trace-id`.
 - `trace-id`: The generated trace ID for the workflow run.
 - `traceparent`: The W3C Trace Context traceparent value for the workflow run.
 

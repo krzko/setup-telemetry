@@ -71,11 +71,11 @@ func main() {
 	ctx := context.Background()
 	githubactions.Infof("Starting %s version: %s (%s) commit: %s", actionName, BUILD_VERSION, BUILD_DATE, COMMIT_ID)
 
-	if githubactions.GetInput("github-token") == "" {
+	githubToken := githubactions.GetInput("github-token")
+	if githubToken == "" {
 		githubactions.Fatalf("No GitHub token provided")
 	}
 
-	githubToken := githubactions.GetInput("github-token")
 	runID, _ := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
 	runAttempt, _ := strconv.Atoi(os.Getenv("GITHUB_RUN_ATTEMPT"))
 
@@ -114,6 +114,12 @@ func main() {
 	markdownSummary := fmt.Sprintf("### 🚦 %s\n", actionName)
 	markdownSummary += fmt.Sprintf("trace-id: `%s`\n", traceID)
 	markdownSummary += fmt.Sprintf("traceparent: `%s`\n", traceparent)
+
+	observabilityBackendURL := githubactions.GetInput("observabilityBackendURL")
+	if observabilityBackendURL != "" {
+		traceLink := fmt.Sprintf("%s%s", observabilityBackendURL, traceID)
+		markdownSummary += fmt.Sprintf("\n🔗 [View trace](%s)\n", traceLink)
+	}
 
 	githubactions.AddStepSummary(markdownSummary)
 }
