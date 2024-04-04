@@ -49,7 +49,7 @@ on:
   push:
 
 env:
-  observability-backend-url: https://ui.honeycomb.io/foo/environments/dev/datasets/github.com.foo/trace?trace_id=
+  honeycomb-url: https://ui.honeycomb.io/foo/environments/dev/datasets/github.com.foo/trace?trace_id=
   otel-exporter-otlp-endpoint: otelcol.foo.corp:443
   otel-service-name: o11y.workflows
   otel-resource-attributes: deployment.environent=dev,service.version=0.1.0
@@ -62,7 +62,7 @@ jobs:
         id: setup-telemetry
         uses: krzko/setup-telemetry@v0.5.2
         with:
-          observability-backend-url: ${{ env.observability-backend-url }}
+          observability-backend-url: ${{ env.honeycomb-url }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
         id: setup-telemetry
         uses: krzko/setup-telemetry@v0.5.2
         with:
-          observability-backend-url: ${{ env.observability-backend-url }}
+          observability-backend-url: ${{ env.honeycomb-url }}
 
       - name: Checkout
         uses: actions/checkout@v4
