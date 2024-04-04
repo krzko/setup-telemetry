@@ -115,7 +115,7 @@ func main() {
 	markdownSummary += fmt.Sprintf("trace-id: `%s`\n", traceID)
 	markdownSummary += fmt.Sprintf("traceparent: `%s`\n", traceparent)
 
-	observabilityBackendURL := githubactions.GetInput("observabilityBackendURL")
+	observabilityBackendURL := githubactions.GetInput("observability-backend-url")
 	if observabilityBackendURL != "" {
 		traceLink := fmt.Sprintf("%s%s", observabilityBackendURL, traceID)
 		markdownSummary += fmt.Sprintf("\n🔗 [View trace](%s)\n", traceLink)
