@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -46,24 +47,45 @@ func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, att
 	owner, repo = splitRepo[0], splitRepo[1]
 
 	client := github.NewClient(nil).WithAuthToken(token)
-
 	opts := &github.ListWorkflowJobsOptions{
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
-	runJobs, _, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
+
+	githubactions.Infof("Fetching workflow jobs from GitHub API")
+	runJobs, resp, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
 	if err != nil {
+		githubactions.Errorf("Failed to fetch workflow jobs: %v", err)
+		if resp != nil {
+			githubactions.Infof("GitHub API response status: %s", resp.Status)
+			if resp.Body != nil {
+				bodyBytes, readErr := io.ReadAll(resp.Body)
+				resp.Body.Close()
+				if readErr != nil {
+					githubactions.Errorf("Failed to read response body: %v", readErr)
+				} else {
+					githubactions.Debugf("GitHub API response body: %s", string(bodyBytes))
+				}
+			}
+		}
 		return "", "", "", "", err
 	}
 
 	runnerName := os.Getenv("RUNNER_NAME")
+	githubactions.Infof("Looking for job with runner name: %s", runnerName)
 	for _, job := range runJobs.Jobs {
-		if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
-			createdAt = job.CreatedAt.Format(time.RFC3339)
-			startedAt = job.StartedAt.Format(time.RFC3339)
-			return strconv.FormatInt(*job.ID, 10), *job.Name, createdAt, startedAt, nil
+		if job.RunnerName != nil && job.Name != nil && job.RunAttempt != nil {
+			githubactions.Infof("Inspecting job: %s, runner: %s, attempt: %d", *job.Name, *job.RunnerName, *job.RunAttempt)
+			if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
+				githubactions.Infof("Match found, job name: %s", *job.Name)
+				createdAt = job.CreatedAt.Format(time.RFC3339)
+				startedAt = job.StartedAt.Format(time.RFC3339)
+				return strconv.FormatInt(*job.ID, 10), *job.Name, createdAt, startedAt, nil
+			}
 		}
 	}
 
+	err = fmt.Errorf("no job found matching the criteria")
+	githubactions.Errorf("Error: %v", err)
 	return "", "", "", "", fmt.Errorf("no job found matching the criteria")
 }
 
