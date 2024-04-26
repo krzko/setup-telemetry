@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.5.3
+        uses: krzko/setup-telemetry@v0.5.4
         with:
           observability-backend-url: ${{ env.honeycomb-url }}
 
@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Setup telemetry
         id: setup-telemetry
-        uses: krzko/setup-telemetry@v0.5.3
+        uses: krzko/setup-telemetry@v0.5.4
         with:
           observability-backend-url: ${{ env.honeycomb-url }}
 

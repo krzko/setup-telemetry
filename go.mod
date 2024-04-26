@@ -1,6 +1,6 @@
 module github.com/krzko/setup-telemetry
 
-go 1.21.6
+go 1.22
 
 require (
 	github.com/google/go-github/v60 v60.0.0
