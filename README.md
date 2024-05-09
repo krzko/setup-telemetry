@@ -48,6 +48,8 @@ name: Test and Build
 on:
   push:
 
+permissions: read-all
+
 env:
   honeycomb-url: https://ui.honeycomb.io/foo/environments/dev/datasets/github.com.foo/trace?trace_id=
   otel-exporter-otlp-endpoint: otelcol.foo.corp:443
