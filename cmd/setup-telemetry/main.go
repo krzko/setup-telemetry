@@ -55,7 +55,7 @@ func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, att
 	var attempts int = 3 // Number of attempts for retrying API call
 
 	for i := 0; i < attempts; i++ {
-		githubactions.Infof("Fetching workflow jobs from GitHub API, attempt %d", i+1)
+		githubactions.Infof("Fetching workflow jobs from GitHub API, attempt %d/%d", i+1, attempt)
 		runJobs, resp, err = client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
 		if err == nil {
 			runnerName := os.Getenv("RUNNER_NAME")
