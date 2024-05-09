@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -51,42 +50,53 @@ func getGitHubJobInfo(ctx context.Context, token, owner, repo string, runID, att
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
 
-	githubactions.Infof("Fetching workflow jobs from GitHub API")
-	runJobs, resp, err := client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
-	if err != nil {
-		githubactions.Errorf("Failed to fetch workflow jobs: %v", err)
-		if resp != nil {
-			githubactions.Infof("GitHub API response status: %s", resp.Status)
-			if resp.Body != nil {
-				bodyBytes, readErr := io.ReadAll(resp.Body)
-				resp.Body.Close()
-				if readErr != nil {
-					githubactions.Errorf("Failed to read response body: %v", readErr)
-				} else {
-					githubactions.Debugf("GitHub API response body: %s", string(bodyBytes))
+	var runJobs *github.Jobs
+	var resp *github.Response
+	var attempts int = 3 // Number of attempts for retrying API call
+
+	for i := 0; i < attempts; i++ {
+		githubactions.Infof("Fetching workflow jobs from GitHub API, attempt %d", i+1)
+		runJobs, resp, err = client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
+		if err == nil {
+			runnerName := os.Getenv("RUNNER_NAME")
+			found := false
+			for _, job := range runJobs.Jobs {
+				if job.RunnerName != nil && job.Name != nil && job.RunAttempt != nil {
+					if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
+						createdAt = job.CreatedAt.Format(time.RFC3339)
+						startedAt = job.StartedAt.Format(time.RFC3339)
+						githubactions.Infof("Match found, job name: %s", *job.Name)
+						return strconv.FormatInt(*job.ID, 10), *job.Name, createdAt, startedAt, nil
+					}
 				}
 			}
-		}
-		return "", "", "", "", err
-	}
-
-	runnerName := os.Getenv("RUNNER_NAME")
-	githubactions.Infof("Looking for job with runner name: %s", runnerName)
-	for _, job := range runJobs.Jobs {
-		if job.RunnerName != nil && job.Name != nil && job.RunAttempt != nil {
-			githubactions.Infof("Inspecting job: %s, runner: %s, attempt: %d", *job.Name, *job.RunnerName, *job.RunAttempt)
-			if *job.RunAttempt == attempt && *job.RunnerName == runnerName {
-				githubactions.Infof("Match found, job name: %s", *job.Name)
-				createdAt = job.CreatedAt.Format(time.RFC3339)
-				startedAt = job.StartedAt.Format(time.RFC3339)
-				return strconv.FormatInt(*job.ID, 10), *job.Name, createdAt, startedAt, nil
+			if !found {
+				githubactions.Infof("No matching job found on attempt %d", i+1)
+				if i < attempts-1 { // Retry if the maximum number of attempts is not reached
+					time.Sleep(3 * time.Second) // Wait
+					continue
+				}
+			}
+		} else {
+			githubactions.Errorf("Failed to fetch workflow jobs: %v", err)
+			if resp != nil {
+				githubactions.Infof("GitHub API response status: %s", resp.Status)
+			}
+			if i < attempts-1 { // Retry if the maximum number of attempts is not reached
+				time.Sleep(3 * time.Second) // Wait
+				continue
 			}
 		}
+		break
 	}
 
-	err = fmt.Errorf("no job found matching the criteria")
-	githubactions.Errorf("Error: %v", err)
-	return "", "", "", "", fmt.Errorf("no job found matching the criteria")
+	// Generate a fallback job span ID if no job is found after all attempts
+	spanID, genErr := generateJobSpanID(runID, int(attempt), "fallback-job")
+	if genErr != nil {
+		githubactions.Errorf("Error generating fallback job span ID: %v", genErr)
+		return "", "", "", "", fmt.Errorf("failed to retrieve job and generate fallback span ID: %v", genErr)
+	}
+	return "", "fallback-job", "", "", fmt.Errorf("no job found matching the criteria after %d attempts, fallback span ID: %s", attempts, spanID)
 }
 
 func main() {
