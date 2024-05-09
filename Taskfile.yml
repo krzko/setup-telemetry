@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   BUILD_VERSION:
-    sh: echo "v0.5.4"
+    sh: echo "v0.5.5"
   BUILD_DATE:
     sh: date "+%F %T"
   COMMIT_ID:
