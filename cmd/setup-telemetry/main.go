@@ -118,7 +118,6 @@ func main() {
 	jobID, jobName, createdAt, startedAt, err := getGitHubJobInfo(ctx, githubToken, os.Getenv("GITHUB_REPOSITORY_OWNER"), os.Getenv("GITHUB_REPOSITORY"), runID, int64(runAttempt))
 	if err != nil {
 		githubactions.Errorf("Error getting job info: %v", err)
-		os.Exit(1)
 	}
 
 	githubactions.SetOutput("job-id", jobID)
